@@ -1,10 +1,42 @@
-import React, { useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Button, Card, Col, Form, InputGroup, Row } from "react-bootstrap";
+import AuthContext from "../store/auth-context";
 
 const Profile = () => {
+  const [profileData, setProfileData] = useState({});
   const [updateSuccess, setUpdateSuccess] = useState(null);
   const nameInputRef = useRef();
   const urlInputRef = useRef();
+  const authCtx = useContext(AuthContext);
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const response = await fetch(
+          "https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyA2sHH1MU-g17pDj7gfb7pJJaQB9PZcsuU",
+          {
+            method: "POST",
+            body: JSON.stringify({ idToken: authCtx.idToken }),
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (response.ok) {
+          const data = await response.json();
+          if (data.users && data.users.length > 0) {
+            const { displayName, photoUrl } = data.users[0];
+            setProfileData({ displayName, photoUrl });
+          }
+        } else {
+          console.error("Error fetching profile data:", response.statusText);
+        }
+      } catch (error) {
+        console.error("Error fetching profile data:", error);
+      }
+    };
+
+    fetchProfileData();
+  }, [authCtx.idToken]);
   const handleUpdate = async (event) => {
     event.preventDefault();
     const enteredName = nameInputRef.current.value;
@@ -25,7 +57,9 @@ const Profile = () => {
         }
       );
       if (response.ok) {
+        const data = await response.json();
         setUpdateSuccess(true);
+        authCtx.login(data.idToken);
       } else {
         setUpdateSuccess(false);
       }
@@ -73,6 +107,7 @@ const Profile = () => {
               id="inlineFormInput"
               placeholder="Write Your Name"
               ref={nameInputRef}
+              defaultValue={profileData.displayName}
             />
           </Col>
           <Col xs="auto">
@@ -85,6 +120,7 @@ const Profile = () => {
                 id="inlineFormInputGroup"
                 placeholder="Username"
                 ref={urlInputRef}
+                defaultValue={profileData.photoUrl}
               />
             </InputGroup>
           </Col>
