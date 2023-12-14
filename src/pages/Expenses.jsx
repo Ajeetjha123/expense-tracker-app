@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import AuthContext from "../store/auth-context";
 export const Expenses = () => {
   const authCtx = useContext(AuthContext);
+  const isLoggedIn = authCtx.isLoggedIn;
   const navigate = useNavigate();
   const [verifictionSent, setVerificationSent] = useState(false);
   const sendVerificationEmail = async () => {
@@ -36,27 +37,37 @@ export const Expenses = () => {
     <Card>
       <Card.Body>
         <span>Welcome To Expense Tracker!!!</span>
+        {isLoggedIn && (
+          <Button
+            size="sm"
+            className="float-end rounded-pill"
+            variant="outline-secondary"
+            onClick={() => {
+              authCtx.logout();
+              navigate("/");
+            }}
+          >
+            LogOut
+          </Button>
+        )}
+        <Button
+          size="sm"
+          className="float-end rounded-pill"
+          variant="outline-secondary"
+          onClick={() => navigate("/profile")}
+        >
+          <span>Your Profile Is Incomplete. </span>
+          <span style={{ color: "blue" }}>Complete Now</span>
+        </Button>
         {!verifictionSent ? (
-          <div>
-            <Button
-              size="sm"
-              className="float-end rounded-pill"
-              variant="outline-secondary"
-              onClick={() => navigate("/profile")}
-            >
-              <span>Your Profile Is Incomplete. </span>
-              <span style={{ color: "blue" }}>Complete Now</span>
-            </Button>
-
-            <Button
-              size="sm"
-              className="float-end rounded-pill"
-              variant="outline-secondary"
-              onClick={() => sendVerificationEmail()}
-            >
-              Send Verification Email
-            </Button>
-          </div>
+          <Button
+            size="sm"
+            className="float-end rounded-pill"
+            variant="outline-secondary"
+            onClick={() => sendVerificationEmail()}
+          >
+            Send Verification Email
+          </Button>
         ) : (
           <p>Verification email sent! Check your inbox.</p>
         )}
