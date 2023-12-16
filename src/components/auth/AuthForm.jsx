@@ -114,13 +114,13 @@ const AuthForm = () => {
             >
               {isLogin ? "Login" : "Sign Up"}
             </Button>
-            {isLogin && (
-              <Link className="p-5" to="/forgot">
-                Forgot Password?
-              </Link>
-            )}
           </Form>
         </Card.Body>
+        {isLogin && (
+          <Link className="text-center" to="/forgot">
+            Forgot Password?
+          </Link>
+        )}
         <Card.Footer
           className="text-center"
           onClick={switchAuthModeHandler}

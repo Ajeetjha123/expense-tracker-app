@@ -9,6 +9,8 @@ const ExpenseTracker = () => {
   });
 
   const [expenses, setExpenses] = useState([]);
+  const [, setEditingExpenseId] = useState(null);
+  const [, setShowModal] = useState(false);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -22,7 +24,7 @@ const ExpenseTracker = () => {
     if (expenseData.amount && expenseData.description) {
       saveExpenseToFirebase(expenseData);
       setExpenses((prevExpenses) => [...prevExpenses, expenseData]);
-      // Clear the form after adding the expense
+
       setExpenseData({
         amount: "",
         description: "",
@@ -51,6 +53,34 @@ const ExpenseTracker = () => {
       console.log("Data added to Firebase successfully:", data);
     } catch (error) {
       console.error("Error adding data to Firebase:", error);
+    }
+  };
+  const handleDeleteExpense = async (id) => {
+    const apiUrl = `https://fir-course-cbbca-default-rtdb.firebaseio.com/expense/${id}.json`;
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      setExpenses((prevExpenses) =>
+        prevExpenses.filter((expense) => expense.id !== id)
+      );
+      console.log("Expense successfully deleted");
+    } catch (error) {
+      console.error("Error deleting expense:", error);
+    }
+  };
+  const handleEditExpense = (id) => {
+    const expenseToEdit = expenses.find((expense) => expense.id === id);
+    if (expenseToEdit) {
+      setExpenseData({ ...expenseToEdit });
+      setEditingExpenseId(id);
+      setShowModal(true);
     }
   };
   useEffect(() => {
@@ -151,6 +181,21 @@ const ExpenseTracker = () => {
                   <div>
                     <span className="fw-bold">Category:</span>{" "}
                     {expense.category}
+                  </div>
+                  <div>
+                    <Button
+                      variant="danger"
+                      className="mx-2"
+                      onClick={() => handleDeleteExpense(expense.id)}
+                    >
+                      Delete
+                    </Button>
+                    <Button
+                      variant="primary"
+                      onClick={() => handleEditExpense(expense.id)}
+                    >
+                      Edit
+                    </Button>
                   </div>
                 </li>
               ))}
