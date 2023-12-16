@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Card, Col, Form, Row } from "react-bootstrap";
 
 const ExpenseTracker = () => {
@@ -20,6 +20,7 @@ const ExpenseTracker = () => {
 
   const handleAddExpense = () => {
     if (expenseData.amount && expenseData.description) {
+      saveExpenseToFirebase(expenseData);
       setExpenses((prevExpenses) => [...prevExpenses, expenseData]);
       // Clear the form after adding the expense
       setExpenseData({
@@ -29,6 +30,59 @@ const ExpenseTracker = () => {
       });
     }
   };
+  const saveExpenseToFirebase = async (expenseData) => {
+    const apiUrl =
+      "https://fir-course-cbbca-default-rtdb.firebaseio.com/expense.json";
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(expenseData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const data = await response.json();
+      console.log("Data added to Firebase successfully:", data);
+    } catch (error) {
+      console.error("Error adding data to Firebase:", error);
+    }
+  };
+  useEffect(() => {
+    // Fetch data from Firebase when the component mounts
+    const fetchData = async () => {
+      const apiUrl =
+        "https://fir-course-cbbca-default-rtdb.firebaseio.com/expense.json";
+
+      try {
+        const response = await fetch(apiUrl);
+
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+
+        const data = await response.json();
+        if (data) {
+          // Convert the Firebase response object into an array
+          const expensesArray = Object.keys(data).map((key) => ({
+            id: key,
+            ...data[key],
+          }));
+
+          setExpenses(expensesArray);
+        }
+      } catch (error) {
+        console.error("Error fetching data from Firebase:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <div className="d-flex align-items-center justify-content-center vh-100">
