@@ -2,6 +2,7 @@ import React, { useContext, useState } from "react";
 import { Button, Card } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import AuthContext from "../store/auth-context";
+import ExpenseTracker from "./ExpenseTracker";
 export const Expenses = () => {
   const authCtx = useContext(AuthContext);
   const isLoggedIn = authCtx.isLoggedIn;
@@ -72,6 +73,7 @@ export const Expenses = () => {
           <p>Verification email sent! Check your inbox.</p>
         )}
       </Card.Body>
+      <ExpenseTracker />
     </Card>
   );
 };
