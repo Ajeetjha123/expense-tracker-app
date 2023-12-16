@@ -1,7 +1,7 @@
 import React, { useContext, useRef, useState } from "react";
 import { Button, Card, Form } from "react-bootstrap";
 import AuthContext from "../../store/auth-context";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const AuthForm = () => {
   const nevigate = useNavigate();
@@ -114,6 +114,11 @@ const AuthForm = () => {
             >
               {isLogin ? "Login" : "Sign Up"}
             </Button>
+            {isLogin && (
+              <Link className="p-5" to="/forgot">
+                Forgot Password?
+              </Link>
+            )}
           </Form>
         </Card.Body>
         <Card.Footer

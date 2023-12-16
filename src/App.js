@@ -1,15 +1,16 @@
 //import "./App.css";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import AuthForm from "./components/auth/AuthForm";
 import { Expenses } from "./pages/Expenses";
 import Profile from "./pages/Profile";
 import { useContext } from "react";
 import AuthContext from "./store/auth-context";
+import ForgotPassword from "./pages/ForgotPassword";
 function App() {
   const authCtx = useContext(AuthContext);
   const isLoggedIn = authCtx.isLoggedIn;
   return (
-    <BrowserRouter>
+    <Router>
       <Routes>
         {isLoggedIn ? (
           <Route path="/expense" element={<Expenses />} />
@@ -17,8 +18,9 @@ function App() {
           <Route path="/" element={<AuthForm />} />
         )}
         <Route path="/profile" element={<Profile />} />
+        <Route path="/forgot" element={<ForgotPassword />} />
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
 }
 
