@@ -113,6 +113,10 @@ const ExpenseTracker = () => {
 
     fetchData();
   }, []);
+  const totalExpenses = expenses.reduce(
+    (total, expense) => total + parseFloat(expense.amount),
+    0
+  );
 
   return (
     <div className="d-flex align-items-center justify-content-center vh-100">
@@ -150,7 +154,6 @@ const ExpenseTracker = () => {
                   <option value="Food">Food</option>
                   <option value="Petrol">Petrol</option>
                   <option value="Salary">Salary</option>
-                  {/* Add other categories as needed */}
                 </Form.Control>
               </Col>
             </Row>
@@ -201,6 +204,13 @@ const ExpenseTracker = () => {
               ))}
             </ul>
           </div>
+          {totalExpenses > 10000 && (
+            <div className="mt-4 text-center">
+              <Button variant="warning" className="rounded-pill">
+                Activate Premium
+              </Button>
+            </div>
+          )}
         </Card.Body>
       </Card>
     </div>
