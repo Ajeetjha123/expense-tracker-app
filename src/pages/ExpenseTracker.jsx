@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useReducer, useState } from "react";
 import { Button, Card, Col, Form, Row } from "react-bootstrap";
-
+import { saveAs } from "file-saver";
+import "../App.css";
+import themeReducer from "./ThemeReducer";
 const ExpenseTracker = () => {
   const [expenseData, setExpenseData] = useState({
     amount: "",
@@ -11,7 +13,11 @@ const ExpenseTracker = () => {
   const [expenses, setExpenses] = useState([]);
   const [, setEditingExpenseId] = useState(null);
   const [, setShowModal] = useState(false);
-
+  const [theme, dispatchTheme] = useReducer(themeReducer, { darkTheme: false });
+  const [toggleTheme, setToggleTheme] = useState(false);
+  const toggleHandler = () => {
+    setToggleTheme((prev) => !prev);
+  };
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setExpenseData((prevData) => ({
@@ -75,7 +81,8 @@ const ExpenseTracker = () => {
       console.error("Error deleting expense:", error);
     }
   };
-  const handleEditExpense = (id) => {
+  const handleEditExpense = async (id) => {
+    await handleDeleteExpense(id);
     const expenseToEdit = expenses.find((expense) => expense.id === id);
     if (expenseToEdit) {
       setExpenseData({ ...expenseToEdit });
@@ -83,8 +90,8 @@ const ExpenseTracker = () => {
       setShowModal(true);
     }
   };
+
   useEffect(() => {
-    // Fetch data from Firebase when the component mounts
     const fetchData = async () => {
       const apiUrl =
         "https://fir-course-cbbca-default-rtdb.firebaseio.com/expense.json";
@@ -98,7 +105,6 @@ const ExpenseTracker = () => {
 
         const data = await response.json();
         if (data) {
-          // Convert the Firebase response object into an array
           const expensesArray = Object.keys(data).map((key) => ({
             id: key,
             ...data[key],
@@ -117,9 +123,28 @@ const ExpenseTracker = () => {
     (total, expense) => total + parseFloat(expense.amount),
     0
   );
+  const handleDownloadCSV = () => {
+    // Convert expenses data to CSV format
+    const csvContent =
+      "Amount,Description,Category\n" + // CSV header
+      expenses
+        .map(
+          (expense) =>
+            `${expense.amount},${expense.description},${expense.category}`
+        )
+        .join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" });
+
+    saveAs(blob, "expenses.csv");
+  };
 
   return (
-    <div className="d-flex align-items-center justify-content-center vh-100">
+    <div
+      className={`d-flex align-items-center justify-content-center vh-100 ${
+        theme.darkTheme ? "dark-theme" : ""
+      }`}
+    >
       <Card>
         <Card.Body>
           <h4>Add Daily Expenses</h4>
@@ -206,8 +231,34 @@ const ExpenseTracker = () => {
           </div>
           {totalExpenses > 10000 && (
             <div className="mt-4 text-center">
-              <Button variant="warning" className="rounded-pill">
+              <Button
+                variant="warning"
+                className="rounded-pill"
+                onClick={toggleHandler}
+              >
                 Activate Premium
+              </Button>
+            </div>
+          )}
+          {totalExpenses > 10000 && toggleTheme && (
+            <div className="mt-4 text-center">
+              <Button
+                variant="secondary"
+                className="rounded-pill"
+                onClick={() => dispatchTheme({ type: "TOGGLE_THEME" })}
+              >
+                Toggle Theme
+              </Button>
+            </div>
+          )}
+          {totalExpenses > 10000 && toggleTheme && (
+            <div className="mt-4 text-center">
+              <Button
+                variant="success"
+                className="rounded-pill"
+                onClick={handleDownloadCSV}
+              >
+                Download CSV
               </Button>
             </div>
           )}
